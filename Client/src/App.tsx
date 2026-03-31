@@ -24,7 +24,7 @@ function App() {
 
     connection.on("RecieveMessage", (p1, p2) => {
       console.log("Received message");
-      console.log(p1, p2);
+      setMessages(p => [...p, {sender: false, message: p2}]);
     })
 
     return () => {
@@ -45,17 +45,14 @@ function App() {
     setCurrMessage("");
   }
 
-  
-
-
   return (
     <div className={"body"}>
       <div id="messages-section">
         {messages.map((val, i) => {
           if (val.sender == true) {
-            return <span className={"sent-message"}></span>
+            return <span key={i} className={"sent-message"}>{val.message}</span>
           } 
-          return <span className={"recieved-message"}></span>
+          return <span key={i} className={"recieved-message"}>{val.message}</span>
         })}
       </div>
       <form onSubmit={(e) => {
