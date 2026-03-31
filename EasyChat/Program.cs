@@ -1,4 +1,4 @@
-
+using EasyChat.Hubs;
 
 namespace EasyChat;
 
@@ -15,6 +15,7 @@ public class EasyChat
         app.MapGet("/hello", () => "Hello World!");
         app.UseStaticFiles();
         app.MapFallbackToFile("index.html");
+        app.MapHub<ChatHub>("/Chat");
 
         app.Run();
 
