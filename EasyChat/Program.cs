@@ -12,7 +12,7 @@ public class EasyChat
         builder.Services.AddSignalR();
         builder.Services.AddDbContext<DatabaseContext>(options =>
         {
-            options.UseSqlite("Data Source=database.db");
+            options.UseSqlite("Data Source=database.db;Foreign Keys=True");
         });
 
 
