@@ -24,18 +24,12 @@ public class ChatHub : Hub
 
         if (room == null)
         {
-            room = new Room
-            {
-                Id = roomId,
-                Name = $"Room {roomId}",
-                IsKeepAlive = false
-            };
-            _db.Rooms.Add(room);
-            await _db.SaveChangesAsync();
+            await Clients.Caller.SendAsync("CatchError", "Room not found. Please refresh the page and join a room again.");
+            return;
         }
 
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
 
         await Clients.Group(room.Id).SendAsync("ReceiveMessage", "System", $"{user} joined.");
     }

@@ -15,11 +15,9 @@ public class EasyChat
             options.UseSqlite("Data Source=database.db;Foreign Keys=True");
         });
 
-
         var app = builder.Build();
 
-
-        app.MapGet("/hello", () => "Hello World!");
+        app.MapControllers();
         app.UseStaticFiles();
         app.MapFallbackToFile("index.html");
         app.MapHub<ChatHub>("/Chat");
