@@ -1,6 +1,7 @@
 using EasyChat.Hubs;
 using Microsoft.EntityFrameworkCore;
 using EasyChat.Context;
+using EasyChat.Services;
 
 namespace EasyChat;
 
@@ -10,6 +11,8 @@ public class EasyChat
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddSignalR();
+        builder.Services.AddControllers();
+        builder.Services.AddScoped<IMessageService, MessageService>();
         builder.Services.AddDbContext<DatabaseContext>(options =>
         {
             options.UseSqlite("Data Source=database.db;Foreign Keys=True");

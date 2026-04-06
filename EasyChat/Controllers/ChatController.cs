@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using EasyChat.Context;
 using EasyChat.Models;
+using EasyChat.Services;
 using Microsoft.EntityFrameworkCore;
+
+namespace EasyChat.Controllers;
 
 
 [ApiController]
@@ -9,32 +12,32 @@ using Microsoft.EntityFrameworkCore;
 public class ChatController : Controller
 {
     public readonly DatabaseContext _db;
-    public ChatController(DatabaseContext dbContext)
+    private readonly IMessageService _messageService;
+    public ChatController(DatabaseContext dbContext, IMessageService messageService)
     {
         _db = dbContext;
+        _messageService = messageService;
     }
 
-    [HttpGet("Create")]
+    [HttpPost("Create")]
     public async Task<IActionResult> CreateChatRoom()
     {
-        
-        Room room = new Room
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = "Unnamed Chat",
-            IsKeepAlive = false
-        };
-        _db.Rooms.Add(room);
-        await _db.SaveChangesAsync();
-
-        return Ok(room.Id);
+        return Ok(await _messageService.CreateRoom());
         
     }
 
     [HttpGet("GetMessages/{roomId}")]
     public async Task<IActionResult> GetMessages(string roomId)
     {
-        Message[] messages = await _db.Messages.Where(m => m.RoomId == roomId).ToArrayAsync();
+        if (roomId == null || roomId == "")
+        {
+            return BadRequest("Invalid room ID.");
+        }
+        if (!await _db.Rooms.AnyAsync(r => r.Id == roomId))
+        {
+            return NotFound("Room not found.");
+        }
+        Message[] messages = await _messageService.GetMessagesForRoom(roomId);
         return Ok(messages);
     }
 }

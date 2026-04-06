@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using EasyChat.Context;
 using EasyChat.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
+using EasyChat.Services;
 
 
 namespace EasyChat.Hubs;
@@ -10,17 +9,19 @@ namespace EasyChat.Hubs;
 public class ChatHub : Hub
 {
     private readonly DatabaseContext _db;
+    private readonly IMessageService _messageService;
 
-    public ChatHub(DatabaseContext dbContext)
+    public ChatHub(DatabaseContext dbContext, IMessageService messageService)
     {
         _db = dbContext;
+        _messageService = messageService;
     }
 
     public async Task JoinRoom(string user, string roomId)
     {
         Context.Items["roomId"] = roomId;
         // if room doesn't exist, create it
-        Room? room = await _db.Rooms.FirstOrDefaultAsync(r => r.Id == roomId);
+        Room? room = await _db.Rooms.FindAsync(roomId);
 
         if (room == null)
         {
@@ -45,26 +46,25 @@ public class ChatHub : Hub
             return;
         }
 
-        try
-        {
-            Message newMessage = new Message
-            {
-                RoomId = roomId,
-                User = user,
-                Text = message,
-                Timestamp = DateTime.UtcNow
-            };
-            _db.Messages.Add(newMessage);
+        await _messageService.SaveMessage(roomId, user, message);
 
-            await _db.SaveChangesAsync();
-        }
-        catch (Exception ex)
+        await Clients.OthersInGroup(roomId).SendAsync("ReceiveMessage", user, message);
+    }  
+    
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        string? roomId = Context.Items["roomId"] as string;
+
+        if (roomId == null || roomId == "")
         {
-            Debug.WriteLine($"Error saving message: {ex.Message}");
-            await Clients.Caller.SendAsync("CatchError", "Failed to send message. Please try again.");
             return;
         }
 
-        await Clients.OthersInGroup(roomId).SendAsync("ReceiveMessage", user, message);
-    }   
+        await Clients.OthersInGroup(roomId).SendAsync("ReceiveMessage", "System", $"A user has left the chat.");
+        if (roomId != null && roomId != "")
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
+        }
+        await base.OnDisconnectedAsync(exception);
+    }
 }
