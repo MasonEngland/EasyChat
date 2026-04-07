@@ -42,7 +42,7 @@ namespace Final_Project.Migrations
 
                     b.HasIndex("RoomId", "Timestamp");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("EasyChat.Models.Room", b =>
@@ -62,7 +62,7 @@ namespace Final_Project.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("EasyChat.Models.Message", b =>

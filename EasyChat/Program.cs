@@ -12,7 +12,7 @@ public class EasyChat
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddSignalR();
         builder.Services.AddControllers();
-        builder.Services.AddScoped<IMessageService, MessageService>();
+        builder.Services.AddChatServices();
         builder.Services.AddDbContext<DatabaseContext>(options =>
         {
             options.UseSqlite("Data Source=database.db;Foreign Keys=True");
