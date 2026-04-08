@@ -23,3 +23,5 @@ Current draft of the user flow is that a user connects to the base url which lea
 ## design for the chat message feature
 
 This uses signalR to handle socket connection and chat rooms. Each user will call the "JoinRoom" method via the socket connection to be given a connection Id and then added to a specific chat group (like a chat room). This method takes a room Id and connects a user to the chat room that corrisponds to that id. Now any message sent to that group will be recieved by that user. After the chat room is joined messages can be sent via "SendMessage" and recieved via "ReceiveMessage" and all clients should have a "CatchError" for in case the socket server needs to communicate an error to the client. 
+
+to display files the method name is "SendFile" and "RecieveFile"
