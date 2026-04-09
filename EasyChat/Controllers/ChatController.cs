@@ -8,8 +8,8 @@ namespace EasyChat.Controllers;
 
 
 [ApiController]
-[Route("api/Chat")]
-public class ChatController : Controller
+[Route("Api/Chat")]
+public class ChatController : ControllerBase
 {
     public readonly DatabaseContext _db;
     private readonly IMessageService _messageService;

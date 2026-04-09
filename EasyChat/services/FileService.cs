@@ -24,9 +24,10 @@ public class FileService : IFileService
         string uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
         string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-        var stream = new FileStream(filePath, FileMode.Create);
-        await file.CopyToAsync(stream);
-        stream.Close();
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        };
 
         FileMessage fileMessage = new FileMessage
         {
@@ -39,7 +40,7 @@ public class FileService : IFileService
         _db.Files.Add(fileMessage);
         await _db.SaveChangesAsync();
 
-        return false;
+        return true;
     }
 
     public async Task<FileMessage[]> GetFilesForRoom(string roomId)
@@ -47,12 +48,12 @@ public class FileService : IFileService
         return await _db.Files.Where(f => f.RoomId == roomId).ToArrayAsync();
     }
 
-    public async Task<string> GetFilePath(string fileId)
+    public async Task<string?> GetFilePath(string fileId)
     {
         FileMessage? fileMessage = await _db.Files.FindAsync(fileId);
         if (fileMessage == null)
         {
-            throw new Exception("File not found");
+           return null;
         }
 
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", fileMessage.FilePath.TrimStart('/'));
