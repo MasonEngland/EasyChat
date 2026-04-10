@@ -16,9 +16,10 @@
 }
 
 .landing-title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 48px;
+  font-weight: 400;
   text-align: center;
+  color:white;
 }
 
 .landing-sub {
@@ -72,8 +73,12 @@
 }
 
 .landing-btn.primary {
-  background: #0084ff;
+  background: #00f729;
   color: white;
+}
+
+.landing-btn.primary:hover {
+  opacity: 0.85;
 }
 
 .landing-btn.primary:hover {

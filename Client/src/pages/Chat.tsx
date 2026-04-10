@@ -1,53 +1,51 @@
 import { useEffect, useState } from 'react'
-import { useParams, useLocation, useNavigate } from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import connection from '../lib/signalr'
 import type { message } from '../types/socketTypes'
 import '../styles/Chat.css'
 
 function Chat() {
   const { roomId } = useParams<{ roomId: string }>()
-  const location = useLocation()
   const navigate = useNavigate()
-  const name: string = location.state?.name ?? "Anonymous"
-
+  const [name, setName] = useState("")
+  const [nameInput, setNameInput] = useState("")
+  const [joined, setJoined] = useState(false)
   const [messages, setMessages] = useState<message[]>([])
   const [currMessage, setCurrMessage] = useState("")
 
-    // Connect to SignalR hub and set up listeners
-    useEffect(() => {
-    const startConnection = async () => {
-      try {
-        await connection.start()
-        await connection.invoke("JoinRoom", name, roomId)
-        console.log("SignalR Connected, Joined room: ", roomId)
+  const joinRoom = async () => {
+    if (!nameInput.trim()) return
+    setName(nameInput)
+    try {
+      await connection.start()
+      await connection.invoke("JoinRoom", nameInput, roomId)
 
-        // Load message history
-        const res = await fetch(`http://localhost:3000/api/Chat/GetMessages/${roomId}`)
-        console.log("Message history response: ", res)
-        if (res.ok) {
-            const history = await res.json()
-            setMessages(history.map((m: any) => ({ 
-                sender: m.user === name, 
-                message: m.text 
-            })))
-        }
-
-        } catch (err) {
-            console.error("SignalR Connection Error: ", err)
-        }
+      const res = await fetch(`http://localhost:3000/api/Chat/GetMessages/${roomId}`)
+      console.log("History status:", res.status)
+      if (res.ok) {
+        const history = await res.json()
+        console.log("History:", history)
+        setMessages(history.map((m: any) => ({
+          sender: m.user,
+          message: m.text
+        })))
+      }
+    } catch (err) {
+      console.error("SignalR Connection Error: ", err)
     }
-    startConnection()
+    setJoined(true)
+  }
 
+  useEffect(() => {
     connection.on("ReceiveMessage", (user, message) => {
-      setMessages(p => [...p, { sender: user === name, message }])
+      setMessages(p => [...p, { sender: user, message }])
     })
-
     return () => {
       connection.off("ReceiveMessage")
       connection.stop()
     }
-    }, [])
-// Send message to SignalR hub
+  }, [])
+
   const sendMessage = async () => {
     if (!currMessage.trim()) return
     try {
@@ -56,25 +54,55 @@ function Chat() {
       console.log(err)
       return
     }
-    setMessages(p => [...p, { sender: true, message: currMessage }])
+    setMessages(p => [...p, { sender: name, message: currMessage }])
     setCurrMessage("")
   }
 
   return (
     <div className="chat-wrapper">
+      {!joined && (
+        <div className="nickname-overlay">
+          <div className="nickname-popup">
+            <h2>Enter a nickname</h2>
+            <p>to join room <code>{roomId}</code></p>
+            <input
+              className="landing-input"
+              type="text"
+              placeholder="Nickname"
+              value={nameInput}
+              onChange={e => setNameInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && joinRoom()}
+              autoFocus
+            />
+            <button className="landing-btn primary" onClick={joinRoom}>Join</button>
+          </div>
+        </div>
+      )}
+
       <div className="chat-container">
         <div className="chat-header">
-            <button className="home-btn" onClick={() => navigate('/')}>← Home</button>
-            <span className="chat-room-id">Room: <code>{roomId}</code></span>
-            <span className="chat-name">{name}</span>
+          <button className="home-btn" onClick={() => navigate('/')}>← Home</button>
+          <span className="chat-room">Room: <span className="chat-room-id"><code>{roomId}</code></span></span>
+          <span className="chat-name">{name}</span>
         </div>
 
         <div className="messages-section">
-          {messages.map((val, i) =>
-            val.sender
-              ? <span key={i} className="sent-message">{val.message}</span>
-              : <span key={i} className="received-message">{val.message}</span>
-          )}
+          {messages.reduce((groups: any[], val, i) => {
+            const prev = messages[i - 1]
+            if (prev && prev.sender === val.sender) {
+              groups[groups.length - 1].messages.push(val.message)
+            } else {
+              groups.push({ sender: val.sender, messages: [val.message] })
+            }
+            return groups
+          }, []).map((group, i) => (
+            <div key={i} className={`message-row ${group.sender === name ? 'mine' : ''} ${group.sender === 'EasyChat' ? 'system' : ''}`}>
+              <span className="message-sender">{group.sender}</span>
+              {group.messages.map((msg: string, j: number) => (
+                <div key={j} className="message-bubble">{msg}</div>
+              ))}
+            </div>
+          ))}
         </div>
 
         <form onSubmit={e => { e.preventDefault(); sendMessage() }} className="chat-form">

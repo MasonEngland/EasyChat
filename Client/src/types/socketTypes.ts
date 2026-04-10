@@ -1,5 +1,5 @@
 interface message {
-  sender: boolean;
+  sender: string;
   message: string;
 }
 
