@@ -32,7 +32,7 @@ public class ChatHub : Hub
 
         await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
 
-        await Clients.Group(room.Id).SendAsync("ReceiveMessage", "System", $"{user} joined.");
+        await Clients.Group(room.Id).SendAsync("ReceiveMessage", "EasyChat", $"{user} joined.");
     }
 
     public async Task SendMessage(string user, string message)
@@ -60,7 +60,7 @@ public class ChatHub : Hub
             return;
         }
 
-        await Clients.OthersInGroup(roomId).SendAsync("ReceiveMessage", "System", $"A user has left the chat.");
+        await Clients.OthersInGroup(roomId).SendAsync("ReceiveMessage", "EasyChat", $"A user has left the chat.");
         if (roomId != null && roomId != "")
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
