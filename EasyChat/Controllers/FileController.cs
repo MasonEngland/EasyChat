@@ -1,6 +1,8 @@
 using EasyChat.DTO;
 using EasyChat.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using EasyChat.Hubs;
 
 namespace EasyChat.Controllers;
 
@@ -11,9 +13,11 @@ public class FileController : ControllerBase
 {
     
     private readonly IFileService _fileService;
-    public FileController(IFileService fs)
+    private readonly IHubContext<ChatHub> _hubContext;
+    public FileController(IFileService fs, IHubContext<ChatHub> hubContext)
     {
         _fileService = fs;
+        _hubContext = hubContext;
     }
 
     [HttpPost("Upload")]
@@ -22,6 +26,9 @@ public class FileController : ControllerBase
         bool success = await _fileService.UploadFile(request.RoomId, request.File, request.User);
 
         if (!success) return BadRequest("File upload failed. Please try again.");
+
+        await _hubContext.Clients.Group(request.RoomId).SendAsync("ReceiveFile", request.User, request.File.FileName);
+
         return Ok("File uploaded successfully.");
     }
 
@@ -54,6 +61,7 @@ public class FileController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error downloading file: {ex.Message}");
             return NotFound("an error occurred while trying to download the file");
         }
     }

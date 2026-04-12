@@ -3,4 +3,7 @@ appsettings.development.json
 *.sln
 obj
 bin
-database.db
+*.db
+*.db-shm
+*.db-wal
+*.log

@@ -68,19 +68,19 @@ public class ChatHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task SendFile(string user, string fileName)
-    {
-        string? roomId = Context.Items["roomId"] as string;
+    // public async Task SendFile(string user, string fileName)
+    // {
+    //     string? roomId = Context.Items["roomId"] as string;
 
-        if (roomId == null || roomId == "")
-        {
-            Console.WriteLine("Error: roomId is null or empty.");
-            await Clients.Caller.SendAsync("CatchError", "Session Expired. Please refresh the page and join a room again.");
-            return;
-        }
-        await _messageService.SaveMessage(roomId, user, fileName);
+    //     if (roomId == null || roomId == "")
+    //     {
+    //         Console.WriteLine("Error: roomId is null or empty.");
+    //         await Clients.Caller.SendAsync("CatchError", "Session Expired. Please refresh the page and join a room again.");
+    //         return;
+    //     }
+    //     await _messageService.SaveMessage(roomId, user, fileName);
 
 
-        await Clients.OthersInGroup(roomId).SendAsync("ReceiveFile", user, fileName);
-    }
+    //     await Clients.OthersInGroup(roomId).SendAsync("ReceiveFile", user, fileName);
+    // }
 }
