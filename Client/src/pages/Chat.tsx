@@ -40,6 +40,11 @@ function Chat() {
     connection.on("ReceiveMessage", (user, message) => {
       setMessages(p => [...p, { sender: user, message }])
     })
+
+    connection.on("CatchError", (errorMessage) => {
+      // do something with the error message
+      navigate('/')
+    });
     return () => {
       connection.off("ReceiveMessage")
       connection.stop()

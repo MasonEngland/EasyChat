@@ -3,8 +3,10 @@ using EasyChat.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using EasyChat.Hubs;
+using EasyChat.Models;
 
 namespace EasyChat.Controllers;
+
 
 
 [ApiController]
@@ -23,11 +25,11 @@ public class FileController : ControllerBase
     [HttpPost("Upload")]
     public async Task<IActionResult> UploadFile([FromForm] UploadFileRequest request)
     {
-        bool success = await _fileService.UploadFile(request.RoomId, request.File, request.User);
+        FileMessage? result = await _fileService.UploadFile(request.RoomId, request.File, request.User);
 
-        if (!success) return BadRequest("File upload failed. Please try again.");
+        if (result == null) return BadRequest("File upload failed. Please try again.");
 
-        await _hubContext.Clients.Group(request.RoomId).SendAsync("ReceiveFile", request.User, request.File.FileName);
+        await _hubContext.Clients.Group(request.RoomId).SendAsync("ReceiveFile", request.User, request.File.FileName, result.Id);
 
         return Ok("File uploaded successfully.");
     }

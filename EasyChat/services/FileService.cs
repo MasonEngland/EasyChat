@@ -14,7 +14,7 @@ public class FileService : IFileService
         _db = dbContext;
     }
 
-    public async Task<bool> UploadFile(string roomId, IFormFile file, string user)
+    public async Task<FileMessage?> UploadFile(string roomId, IFormFile file, string user)
     {
         string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", roomId);
         if (!Directory.Exists(uploadsFolder))
@@ -40,7 +40,7 @@ public class FileService : IFileService
         _db.Files.Add(fileMessage);
         await _db.SaveChangesAsync();
 
-        return true;
+        return fileMessage;
     }
 
     public async Task<FileMessage[]> GetFilesForRoom(string roomId)
