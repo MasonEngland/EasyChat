@@ -13,6 +13,7 @@ public class EasyChat
         builder.Services.AddSignalR();
         builder.Services.AddControllers();
         builder.Services.AddChatServices();
+        builder.Services.AddHostedService<RoomCleanupWorker>();
         builder.Services.AddDbContext<DatabaseContext>(options =>
         {
             options.UseSqlite("Data Source=database.db;Foreign Keys=True");

@@ -23,11 +23,15 @@ public class ChatHub : Hub
         // if room doesn't exist, create it
         Room? room = await _db.Rooms.FindAsync(roomId);
 
+       
         if (room == null)
         {
             await Clients.Caller.SendAsync("CatchError", "Room not found. Please refresh the page and join a room again.");
             return;
         }
+
+        room.lastActive = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
 
 
         await Groups.AddToGroupAsync(Context.ConnectionId, room.Id);
