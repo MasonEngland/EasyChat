@@ -9,3 +9,16 @@ public class UploadFileRequest
 
 
 }
+
+public class AIRequest
+{
+    public required string Model { get; set;}
+    public required AIMessage Message { get; set; }
+}
+
+
+public class AIMessage
+{
+    public required string Role { get; set; }
+    public required string Content { get; set; }
+}
