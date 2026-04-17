@@ -16,6 +16,12 @@ public class AIRequest
     public required AIMessage Message { get; set; }
 }
 
+public class AIRequestDTO
+{
+    public required string RoomId { get; set; }
+    public required string UserMessage { get; set; }
+}
+
 
 public class AIMessage
 {
