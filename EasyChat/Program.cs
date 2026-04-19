@@ -16,7 +16,8 @@ public class EasyChat
         builder.Services.AddHostedService<RoomCleanupWorker>();
         builder.Services.AddDbContext<DatabaseContext>(options =>
         {
-            options.UseSqlite("Data Source=database.db;Foreign Keys=True");
+            Console.WriteLine("Using connection string: " + builder.Configuration.GetConnectionString("Default"));
+            options.UseSqlite(builder.Configuration.GetConnectionString("Default"));
         });
         builder.Services.AddCors(options =>
         {
@@ -30,6 +31,13 @@ public class EasyChat
         });
 
         var app = builder.Build();
+
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+            db.Database.Migrate();
+        }
         
         app.UseCors();
         app.MapControllers();

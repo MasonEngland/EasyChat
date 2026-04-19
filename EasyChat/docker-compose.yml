@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: easychat_app
+    depends_on:
+      - ollama
+    volumes:
+      - sqlite_data:/data
+
+    environment:
+      - ConnectionStrings__Default=Data Source=/data/app.db;Foreign Keys=True
+    ports:
+      - "3000:8080"
+
+
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  sqlite_data:
+  ollama_data:
