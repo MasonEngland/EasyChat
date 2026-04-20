@@ -15,36 +15,49 @@ public class AIService : IAIService
 
     public async Task<string> GetAIResponse(string roomId, string userMessage)
     {
-        using HttpClient client = new HttpClient();
+        try
         {
-            var response = await client.PostAsJsonAsync("http://localhost:11434/api/chat", new
+            using HttpClient client = new HttpClient();
             {
-                model ="mistral",
-                messages = new[]
+                client.Timeout = TimeSpan.FromMinutes(2);
+                var response = await client.PostAsJsonAsync("http://ollama:11434/api/chat", new
                 {
-                    new { role = "system", content = "You are a helpful assistant in a chat room to help answer questions about general knowledge and trivia. Always be polite and formate responses in markdown. Keep responses brief. Use a conversational tone" },
-                    new { role = "user", content = userMessage }
-                },
-                stream = false
-            });
+                    model ="mistral",
+                    messages = new[]
+                    {
+                        new { role = "system", content = "You are a helpful assistant in a chat room to help answer questions about general knowledge and trivia. Always be polite and formate responses in markdown. Keep responses brief. Use a conversational tone" },
+                        new { role = "user", content = userMessage }
+                    },
+                    stream = false
+                });
 
-            var formattedResponse = await JsonSerializer.DeserializeAsync<AIRequest>(await response.Content.ReadAsStreamAsync());
-            
 
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError($"OpenAI API error: {response.StatusCode}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError($"OpenAI API error: {response.StatusCode}");
 
-                return "Sorry, I'm having trouble generating a response right now.";
-            }
+                    return "Sorry, I'm having trouble generating a response right now.";
+                }
 
-            if (formattedResponse == null || formattedResponse.Message == null || string.IsNullOrEmpty(formattedResponse.Message.Content))
-            {
-                _logger.LogError("OpenAI API error: Invalid response format");
-                return "Sorry, I couldn't understand the response from the AI.";
-            }
+                var formattedResponse = await JsonSerializer.DeserializeAsync<AIRequest>(await response.Content.ReadAsStreamAsync());
+                
 
-            return formattedResponse.Message.Content;
-        };
+                
+
+                if (formattedResponse == null || formattedResponse.message == null || string.IsNullOrEmpty(formattedResponse.message.content))
+                {
+                    _logger.LogError("OpenAI API error: Invalid response format");
+                    return "Sorry, I couldn't understand the response from the AI.";
+                }
+
+                return formattedResponse.message.content;
+            };
+        } catch (Exception ex)
+        {
+            Console.WriteLine($"Error calling OpenAI API: {ex.Message}");
+            _logger.LogError(ex, "Error calling OpenAI API");
+            return "Sorry, I'm having trouble generating a response right now.";
+        }
+        
     }
 }

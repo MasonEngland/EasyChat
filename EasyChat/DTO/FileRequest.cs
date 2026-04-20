@@ -12,8 +12,8 @@ public class UploadFileRequest
 
 public class AIRequest
 {
-    public required string Model { get; set;}
-    public required AIMessage Message { get; set; }
+    public required string model { get; set;}
+    public required AIMessage message { get; set; }
 }
 
 public class AIRequestDTO
@@ -25,6 +25,6 @@ public class AIRequestDTO
 
 public class AIMessage
 {
-    public required string Role { get; set; }
-    public required string Content { get; set; }
+    public required string role { get; set; }
+    public required string content { get; set; }
 }
