@@ -1,4 +1,3 @@
-using EasyChat.Context;
 using System.Text.Json;
 using EasyChat.DTO;
 
@@ -18,7 +17,7 @@ public class AIService : IAIService
     {
         using HttpClient client = new HttpClient();
         {
-            var response = await client.PostAsJsonAsync("http://localhost:11434/api/generate", new
+            var response = await client.PostAsJsonAsync("http://localhost:11434/api/chat", new
             {
                 model ="mistral",
                 messages = new[]

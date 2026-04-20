@@ -7,3 +7,4 @@ bin
 *.db-shm
 *.db-wal
 *.log
+wwwroot/uploads
