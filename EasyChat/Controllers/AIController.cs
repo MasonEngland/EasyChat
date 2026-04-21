@@ -29,6 +29,8 @@ public class AIController : ControllerBase
 
         if (room == null) return NotFound("Room not found");
 
+        if (string.IsNullOrEmpty(request.UserMessage)) return BadRequest("User message cannot be empty");
+
         var response = await _aiService.GetAIResponse(request.RoomId, request.UserMessage);
 
         await _hubContext.Clients.Group(request.RoomId).SendAsync("ReceiveMessage", "AI Assistant", response);

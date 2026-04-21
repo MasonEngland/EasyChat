@@ -40,4 +40,13 @@ public class ChatController : ControllerBase
         Message[] messages = await _messageService.GetMessagesForRoom(roomId);
         return Ok(messages);
     }
+
+    [HttpPost("UpdateRoomLife/{keepAlive}")]
+    public async Task<IActionResult> UpdateRoomLife(string keepAlive)
+    {
+        bool keepAliveValue = keepAlive == "true" ? true : false;
+        await _db.Rooms.Where(r => r.IsKeepAlive == keepAliveValue).ForEachAsync(r => r.lastActive = DateTime.UtcNow);
+        return Ok();
+        
+    }
 }
