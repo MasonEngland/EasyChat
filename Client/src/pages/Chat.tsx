@@ -12,6 +12,7 @@ function Chat() {
   const [joined, setJoined] = useState(false)
   const [messages, setMessages] = useState<message[]>([])
   const [currMessage, setCurrMessage] = useState("")
+  const [aiLoading, setAiLoading] = useState(false)
 
   const joinRoom = async () => {
     if (!nameInput.trim()) return
@@ -42,7 +43,6 @@ function Chat() {
     })
 
     connection.on("CatchError", (errorMessage) => {
-      // do something with the error message
       navigate('/')
     });
     return () => {
@@ -52,15 +52,47 @@ function Chat() {
   }, [])
 
   const sendMessage = async () => {
-    if (!currMessage.trim()) return
+    const text = currMessage.trim()
+    if (!text) return
+    setCurrMessage("")
+
+    if (text.toLowerCase().startsWith('/ai ')) {
+      const prompt = text.slice(4).trim()
+      if (!prompt) return
+
+      // Send the user's /ai message to the room normally first
+      try {
+        await connection.invoke("SendMessage", name, text)
+      } catch (err) {
+        console.log(err)
+        return
+      }
+      setMessages(p => [...p, { sender: name, message: text }])
+
+      // Hit the backend — it calls Ollama and broadcasts via SignalR to everyone
+      setAiLoading(true)
+      try {
+        await fetch(`http://localhost:3000/Api/AI/GetResponse`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roomId, userMessage: prompt })
+        })
+      } catch (err) {
+        console.error("Error generating AI response: ", err)
+      } finally {
+        setAiLoading(false)
+      }
+      return
+    }
+
+    // Regular message
     try {
-      await connection.invoke("SendMessage", name, currMessage)
+      await connection.invoke("SendMessage", name, text)
     } catch (err) {
       console.log(err)
       return
     }
-    setMessages(p => [...p, { sender: name, message: currMessage }])
-    setCurrMessage("")
+    setMessages(p => [...p, { sender: name, message: text }])
   }
 
   return (
@@ -101,24 +133,38 @@ function Chat() {
             }
             return groups
           }, []).map((group, i) => (
-            <div key={i} className={`message-row ${group.sender === name ? 'mine' : ''} ${group.sender === 'EasyChat' ? 'system' : ''}`}>
+            <div key={i} className={`message-row
+              ${group.sender === name ? 'mine' : ''}
+              ${group.sender === 'EasyChat' ? 'system' : ''}
+              ${group.sender === 'AI Assistant' ? 'ai' : ''}`}>
               <span className="message-sender">{group.sender}</span>
               {group.messages.map((msg: string, j: number) => (
                 <div key={j} className="message-bubble">{msg}</div>
               ))}
             </div>
           ))}
+
+          {aiLoading && (
+            <div className="message-row ai">
+              <span className="message-sender">AI Assistant</span>
+              <div className="message-bubble ai-typing">
+                <span /><span /><span />
+              </div>
+            </div>
+          )}
         </div>
 
         <form onSubmit={e => { e.preventDefault(); sendMessage() }} className="chat-form">
           <input
             type="text"
             className="message-bar"
-            placeholder="Type a message..."
+            placeholder="Type a message... or /ai <question>"
             value={currMessage}
             onChange={e => setCurrMessage(e.target.value)}
           />
-          <button type="submit" className="submit-button">Send</button>
+          <button type="submit" className="submit-button" disabled={aiLoading}>
+            {aiLoading ? '…' : 'Send'}
+          </button>
         </form>
       </div>
     </div>
