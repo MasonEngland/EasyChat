@@ -46,7 +46,8 @@ function Chat() {
       navigate('/')
     });
     return () => {
-      connection.off("ReceiveMessage")
+      connection.off("ReceiveMessage");
+      connection.off("CatchError");
       connection.stop()
     }
   }, [])
