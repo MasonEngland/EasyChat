@@ -28,3 +28,9 @@ public class AIMessage
     public required string role { get; set; }
     public required string content { get; set; }
 }
+
+public class KeepAliveRequest
+{
+    public required bool KeepAlive { get; set; }
+    public required string RoomId { get; set; }
+}

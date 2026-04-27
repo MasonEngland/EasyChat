@@ -3,6 +3,8 @@ using EasyChat.Context;
 using EasyChat.Models;
 using EasyChat.Services;
 using Microsoft.EntityFrameworkCore;
+using EasyChat.DTO;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace EasyChat.Controllers;
 
@@ -41,12 +43,19 @@ public class ChatController : ControllerBase
         return Ok(messages);
     }
 
-    [HttpPost("UpdateRoomLife/{keepAlive}")]
-    public async Task<IActionResult> UpdateRoomLife(string keepAlive)
+    [HttpPost("UpdateRoomLife")]
+    public async Task<IActionResult> UpdateRoomLife([FromBody] KeepAliveRequest request)
     {
-        bool keepAliveValue = keepAlive == "true" ? true : false;
-        await _db.Rooms.Where(r => r.IsKeepAlive == keepAliveValue).ForEachAsync(r => r.lastActive = DateTime.UtcNow);
-        return Ok();
-        
+        bool keepAliveValue = request.KeepAlive == true;
+
+        try
+        {
+            await _db.Rooms.Where(r => r.Id == request.RoomId).ExecuteUpdateAsync(s => s.SetProperty(r => r.IsKeepAlive, keepAliveValue));
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while updating the room: {ex.Message}");
+        }
     }
 }
