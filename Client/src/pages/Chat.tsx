@@ -13,6 +13,7 @@ function Chat() {
   const [messages, setMessages] = useState<message[]>([])
   const [currMessage, setCurrMessage] = useState("")
   const [aiLoading, setAiLoading] = useState(false)
+  const [keepAlive, setKeepAlive] = useState(false)
 
   const joinRoom = async () => {
     if (!nameInput.trim()) return
@@ -35,6 +36,16 @@ function Chat() {
       console.error("SignalR Connection Error: ", err)
     }
     setJoined(true)
+  }
+
+  const handleKeepAlive = async (value: boolean) => {
+    setKeepAlive(value)
+    if (roomId) localStorage.setItem(`easychat.keepAlive.${roomId}`, value ? 'true' : 'false')
+    await fetch(`http://localhost:3000/Api/Chat/UpdateRoomLife`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId, keepAlive: value })
+    })
   }
 
   useEffect(() => {
@@ -61,7 +72,7 @@ function Chat() {
       const prompt = text.slice(4).trim()
       if (!prompt) return
 
-      // Send the user's /ai message to the room normally first
+      // Send /ai message to the room normally first
       try {
         await connection.invoke("SendMessage", name, text)
       } catch (err) {
@@ -70,7 +81,7 @@ function Chat() {
       }
       setMessages(p => [...p, { sender: name, message: text }])
 
-      // Hit the backend — it calls Ollama and broadcasts via SignalR to everyone
+      // Hit the backend calls Ollama and broadcasts via SignalR to everyone
       setAiLoading(true)
       try {
         await fetch(`http://localhost:3000/Api/AI/GetResponse`, {
@@ -121,6 +132,16 @@ function Chat() {
         <div className="chat-header">
           <button className="home-btn" onClick={() => navigate('/')}>← Home</button>
           <span className="chat-room">Room: <span className="chat-room-id"><code>{roomId}</code></span></span>
+          {joined && (
+          <label className="keepalive-toggle" title="Keep this room alive past 3 days">
+            <input
+              type="checkbox"
+              checked={keepAlive}
+              onChange={e => handleKeepAlive(e.target.checked)}
+            />
+            Keep alive
+          </label>
+        )}
           <span className="chat-name">{name}</span>
         </div>
 
