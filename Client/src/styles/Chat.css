@@ -233,6 +233,26 @@ body {
 .submit-button:hover { background: #1e8c4a; }
 .submit-button:disabled { opacity: 0.4; cursor: default; }
 
+.attach-btn {
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.attach-btn:hover { background: #35373c; }
+
+.file-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.file-link {
+  color: #00aaff;
+  text-decoration: none;
+}
+.file-link:hover { text-decoration: underline; }
+
 /* ── nickname popup ── */
 .nickname-overlay {
   position: fixed;

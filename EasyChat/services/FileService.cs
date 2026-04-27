@@ -50,7 +50,8 @@ public class FileService : IFileService
 
     public async Task<string?> GetFilePath(string fileId)
     {
-        FileMessage? fileMessage = await _db.Files.FindAsync(fileId);
+        if (!int.TryParse(fileId, out int id)) return null;
+        FileMessage? fileMessage = await _db.Files.FindAsync(id);
         if (fileMessage == null)
         {
            return null;

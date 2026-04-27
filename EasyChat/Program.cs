@@ -23,7 +23,7 @@ public class EasyChat
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.WithOrigins("http://localhost:5173")
+                policy.WithOrigins("http://localhost:5173", "http://localhost:3000") //added localhost:3000 for testing with React dev server
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

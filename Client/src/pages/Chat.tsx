@@ -4,16 +4,24 @@ import connection from '../lib/signalr'
 import type { message } from '../types/socketTypes'
 import '../styles/Chat.css'
 
+// test roomId: 0a2ce9e6-8a23-42d5-add8-4e22c31ac0fe
+
+
+type ChatEntry = 
+  | {kind: 'text', sender: string, message: string}
+  | {kind: 'file', sender: string, fileName: string, fileId: number}
 function Chat() {
   const { roomId } = useParams<{ roomId: string }>()
   const navigate = useNavigate()
   const [name, setName] = useState("")
   const [nameInput, setNameInput] = useState("")
   const [joined, setJoined] = useState(false)
-  const [messages, setMessages] = useState<message[]>([])
+  // const [messages, setMessages] = useState<message[]>([])
   const [currMessage, setCurrMessage] = useState("")
   const [aiLoading, setAiLoading] = useState(false)
   const [keepAlive, setKeepAlive] = useState(false)
+  // const [fileMessages, setFileMessages] = useState<ChatEntry[]>([])
+  const [messages, setMessages] = useState<ChatEntry[]>([])
 
   const joinRoom = async () => {
     if (!nameInput.trim()) return
@@ -28,10 +36,18 @@ function Chat() {
         const history = await res.json()
         console.log("History:", history)
         setMessages(history.map((m: any) => ({
+          kind: 'text' as const,
           sender: m.user,
           message: m.text
         })))
       }
+
+      const keepAliveRes = await fetch(`http://localhost:3000/api/Chat/KeepAlive/${roomId}`)
+      if (keepAliveRes.ok) {
+        const isKeepAlive = await keepAliveRes.json()
+        setKeepAlive(isKeepAlive)
+      }
+
     } catch (err) {
       console.error("SignalR Connection Error: ", err)
     }
@@ -48,9 +64,29 @@ function Chat() {
     })
   }
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !roomId) return
+    const formData = new FormData()
+    formData.append('RoomId', roomId)
+    formData.append('User', name)
+    formData.append('File', file)
+    await fetch(`http://localhost:3000/Api/File/Upload`, {
+      method: 'POST',
+      body: formData
+    })
+    e.target.value = '' // Reset file input
+  }
+
   useEffect(() => {
     connection.on("ReceiveMessage", (user, message) => {
-      setMessages(p => [...p, { sender: user, message }])
+      // Only add messages from other users, since we add our own messages optimistically in sendMessage
+      setMessages(p => [...p, { kind: 'text', sender: user, message }])
+    })
+
+    connection.on("ReceiveFile", (user: string, fileName: string, fileId: number) => {
+      // Store file message separately to show a download button instead of a text bubble
+      setMessages(p => [...p, { kind: 'file', sender: user, fileName, fileId }])
     })
 
     connection.on("CatchError", (errorMessage) => {
@@ -58,6 +94,7 @@ function Chat() {
     });
     return () => {
       connection.off("ReceiveMessage");
+      connection.off("ReceiveFile");
       connection.off("CatchError");
       connection.stop()
     }
@@ -79,7 +116,7 @@ function Chat() {
         console.log(err)
         return
       }
-      setMessages(p => [...p, { sender: name, message: text }])
+      setMessages(p => [...p, { kind: 'text', sender: name, message: text }])
 
       // Hit the backend calls Ollama and broadcasts via SignalR to everyone
       setAiLoading(true)
@@ -104,7 +141,7 @@ function Chat() {
       console.log(err)
       return
     }
-    setMessages(p => [...p, { sender: name, message: text }])
+    setMessages(p => [...p, { kind: 'text', sender: name, message: text }])
   }
 
   return (
@@ -149,9 +186,13 @@ function Chat() {
           {messages.reduce((groups: any[], val, i) => {
             const prev = messages[i - 1]
             if (prev && prev.sender === val.sender) {
-              groups[groups.length - 1].messages.push(val.message)
+              if (val.kind === 'text') groups[groups.length - 1].items.push({kind: 'text', message: val.message})
+                else groups[groups.length - 1].items.push({kind: 'file', fileName: val.fileName, fileId: val.fileId})
             } else {
-              groups.push({ sender: val.sender, messages: [val.message] })
+              const item = val.kind === 'text' 
+              ? {kind: 'text', message: val.message} 
+              : {kind: 'file', fileName: val.fileName, fileId: val.fileId}
+              groups.push({ sender: val.sender, items: [item] })
             }
             return groups
           }, []).map((group, i) => (
@@ -160,11 +201,24 @@ function Chat() {
               ${group.sender === 'EasyChat' ? 'system' : ''}
               ${group.sender === 'AI Assistant' ? 'ai' : ''}`}>
               <span className="message-sender">{group.sender}</span>
-              {group.messages.map((msg: string, j: number) => (
-                <div key={j} className="message-bubble">{msg}</div>
+              {group.items.map((item: any, j: number) => (
+                  item.kind === 'text' 
+                  ? <div key={j} className="message-bubble">{item.message}</div>
+                  : <div key={j} className="message-bubble file-bubble">
+                  📎 <a href={`http://localhost:3000/Api/File/Download/${item.fileId}`} target="_blank" className="file-link">{item.fileName}</a>
+                  </div>
               ))}
             </div>
           ))}
+
+          {/* {fileMessages.map((f, i) => (
+            <div key={i} className={`message-row ${f.sender === name ? 'mine' : ''}`}>
+              <span className="message-sender">{f.sender}</span>
+              <div className="message-bubble file-bubble">
+                📎<a href={`http://localhost:3000/Api/File/Download/${f.fileId}`} target="_blank" className="file-link">{f.fileName}</a>
+              </div>
+            </div>
+          ))} */}
 
           {aiLoading && (
             <div className="message-row ai">
@@ -187,6 +241,13 @@ function Chat() {
           <button type="submit" className="submit-button" disabled={aiLoading}>
             {aiLoading ? '…' : 'Send'}
           </button>
+          <input
+            type="file"
+            id="file-input"
+            style={{ display: 'none' }}
+            onChange={handleFileUpload}
+          />
+          <label htmlFor="file-input" className="attach-btn" title="Upload a file">📎</label>
         </form>
       </div>
     </div>

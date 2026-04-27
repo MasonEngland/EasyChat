@@ -58,4 +58,13 @@ public class ChatController : ControllerBase
             return StatusCode(500, $"An error occurred while updating the room: {ex.Message}");
         }
     }
+
+    // added this for checkbox persistence on client side
+    [HttpGet("KeepAlive/{roomId}")]
+    public async Task<IActionResult> GetKeepAlive(string roomId)
+    {
+        var room = await _db.Rooms.FindAsync(roomId);
+        if (room == null) return NotFound();
+        return Ok(room.IsKeepAlive);
+    }
 }
