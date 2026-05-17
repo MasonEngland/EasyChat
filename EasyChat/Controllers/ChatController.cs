@@ -4,7 +4,6 @@ using EasyChat.Models;
 using EasyChat.Services;
 using Microsoft.EntityFrameworkCore;
 using EasyChat.DTO;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace EasyChat.Controllers;
 

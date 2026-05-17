@@ -12,22 +12,34 @@ body {
 /* ── layout ── */
 .chat-wrapper {
   height: 100vh;
+  height: 100dvh; /* FIX 1: Prevents dynamic mobile browser bars from pushing content offscreen */
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: #1e1f22;
+  width: 100%;
 }
 
 .chat-container {
   width: 740px;
-  height: 88vh;
+  max-width: 100vw; /* Scales container to 100% wide on mobile, keeps 740px on desktop */
   display: flex;
   flex-direction: column;
   background-color: #1e1f22;
   border-radius: 8px;
   overflow: hidden;
-  
+
+  /* 💻 Default Computer Height */
+  height: 88vh; 
+
+  /* 📱 Mobile Height Override */
+  @media (max-width: 768px) {
+    height: 100vh;  /* Fallback for older mobile browsers */
+    height: 100dvh; /* Modern mobile dynamic viewport height */
+    border-radius: 0; /* Optional: flattens the corners on full-screen mobile */
+  }
 }
+
 
 /* ── header ── */
 .chat-header {
@@ -40,12 +52,19 @@ body {
   border-bottom: 1px solid #b5bac1;
   background-color: #313338;
   font-size: 13px;
+  min-width: 0; /* FIX 3: Allows flex containers to drop below their default text sizes */
 }
 
 .chat-room {
   color: #b5bac1;
   font-weight: 600;
   font-size: 13px;
+}
+
+/* FIX 4: Protects long generated IDs from freezing layout dimensions */
+.chat-room-id {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .chat-room-id code {
@@ -55,6 +74,12 @@ body {
   border-radius: 4px;
   color: #dcddde;
   font-family: monospace;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .chat-name {
@@ -204,13 +229,15 @@ body {
   background: #313338;
 }
 
+/* FIX 5: Locks inputs to standard scale ratios on mobile devices */
 .message-bar {
   flex: 1;
+  min-width: 0; 
   padding: 11px 16px;
   background: #26272b;
   border: none;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 16px; /* 16px font prevents browsers like iOS Safari from auto-zooming the page */
   font-family: inherit;
   color: #dcddde;
   outline: none;
@@ -229,6 +256,7 @@ body {
   background: #23a559;
   color: white;
   transition: background 0.15s;
+  flex-shrink: 0; /* Prevents the button text from compressing */
 }
 .submit-button:hover { background: #1e8c4a; }
 .submit-button:disabled { opacity: 0.4; cursor: default; }
@@ -239,6 +267,7 @@ body {
   padding: 4px 8px;
   border-radius: 6px;
   transition: background 0.15s;
+  flex-shrink: 0;
 }
 .attach-btn:hover { background: #35373c; }
 
@@ -262,6 +291,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 100;
+  padding: 16px; /* FIX 6: Prevents popup modal from cutting off screen borders */
 }
 
 .nickname-popup {
@@ -271,7 +301,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 440px;
+  width: 100%;       /* FIX 7: Swapped from rigid 440px to responsive boundaries */
+  max-width: 440px; 
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
 .nickname-popup h2 {
@@ -299,7 +330,7 @@ body {
   background: #1e1f22;
   border: 1px solid #1e1f22;
   border-radius: 4px;
-  font-size: 15px;
+  font-size: 16px; /* 16px font prevents mobile page scale changes */
   font-family: inherit;
   color: #dcddde;
   outline: none;
