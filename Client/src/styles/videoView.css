@@ -1,0 +1,28 @@
+
+.video-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000000; /* Pitch black backdrop hides letterboxing */
+    z-index: 99999;           /* Sits on top of chat, nav bars, and modals */
+    
+    /* Flexbox layout automatically centers whatever sits inside it */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column-reverse; 
+}
+
+/* 2. The video engine dynamically adjusts based on asset proportions */
+.video-overlay video {
+    width: 100%;
+    height: 100%;
+    
+    /* CRUCIAL: Scales the video perfectly into the viewport box. 
+       - If landscape: it fills the width and creates top/bottom black bars.
+       - If portrait/vertical: it fills the height and creates side black bars.
+       - Crucially, it NEVER crops or distorts your video frames! */
+    object-fit: contain; 
+}

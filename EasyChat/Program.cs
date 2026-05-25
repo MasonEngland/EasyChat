@@ -2,6 +2,8 @@ using EasyChat.Hubs;
 using Microsoft.EntityFrameworkCore;
 using EasyChat.Context;
 using EasyChat.Services;
+using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace EasyChat;
 
@@ -16,7 +18,6 @@ public class EasyChat
         builder.Services.AddHostedService<RoomCleanupWorker>();
         builder.Services.AddDbContext<DatabaseContext>(options =>
         {
-            Console.WriteLine("Using connection string: " + builder.Configuration.GetConnectionString("Default"));
             options.UseSqlite(builder.Configuration.GetConnectionString("Default"));
         });
         builder.Services.AddCors(options =>

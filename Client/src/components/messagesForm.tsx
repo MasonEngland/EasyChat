@@ -29,6 +29,20 @@ export default function MessagesForm({ roomId, name, setMessages, setAiLoading, 
         e.target.value = '' // Reset file input
     }
 
+    const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file || !roomId) return
+        const formData = new FormData()
+        formData.append('RoomId', roomId)
+        formData.append('User', name)
+        formData.append('File', file)
+        await fetch(`http://localhost:3000/Api/Streaming/UploadVideo`, {
+        method: 'POST',
+        body: formData
+        })
+        e.target.value = '' // Reset file input
+    }
+
    const sendMessage = async () => {
         const text = currMessage.trim()
         if (!text) return
@@ -91,6 +105,13 @@ export default function MessagesForm({ roomId, name, setMessages, setAiLoading, 
             onChange={handleFileUpload}
           />
           <label htmlFor="file-input" className="attach-btn" title="Upload a file">📎</label>
+          <input
+            type="file"
+            id="video-input"
+            style={{ display: 'none' }}
+            onChange={handleVideoUpload}
+          />
+          <label htmlFor="video-input" className="attach-btn" title="Start Streaming Video">📹</label>
         </form>
     )
 }

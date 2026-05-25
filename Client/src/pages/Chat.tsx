@@ -6,6 +6,7 @@ import '../styles/Chat.css';
 import MessagesSection from '../components/messagesSection';
 import MessagesForm from '../components/messagesForm';
 import CorePopup from '../components/corePopup';
+import VideoView from '../components/videoView';
 
 // test roomId: 0a2ce9e6-8a23-42d5-add8-4e22c31ac0fe
 
@@ -24,8 +25,10 @@ function Chat() {
   const [keepAlive, setKeepAlive] = useState(false)
   const [messages, setMessages] = useState<ChatEntry[]>([])
   const [errorMessage, setErrorMessage] = useState(null as string | null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isHost, setIsHost] = useState(false);
 
-  
+  console.log(name);
 
   const handleKeepAlive = async (value: boolean) => {
     setKeepAlive(value)
@@ -50,6 +53,15 @@ function Chat() {
       setMessages(p => [...p, { kind: 'file', sender: user, fileName, fileId }])
     })
 
+    connection.on("ReceiveVideo", async (user: string) => {
+      setIsStreaming(true);
+      console.log("Received video stream event from user: ", user);
+      console.log("Current user: ", name);
+      if (user === name) {
+        setIsHost(true);
+      }
+    });
+
     connection.on("CatchError", (errorMessage) => {
       setErrorMessage(errorMessage)
       navigate('/')
@@ -58,58 +70,67 @@ function Chat() {
       connection.off("ReceiveMessage");
       connection.off("ReceiveFile");
       connection.off("CatchError");
+    }
+  }, [name, navigate])
+
+  useEffect(() => {
+    return () => {
       connection.stop()
     }
   }, [])
 
   
-  console.log(errorMessage);
   return (
-    <div className="chat-wrapper">
-      {errorMessage ? (
-        <CorePopup
-          message={"An error occurred: " + errorMessage}
-        />
-      ): <></>}
-      {!joined && (
-        <NickNameOverlay
-          roomId={roomId!}
-          setName={setName}
-          setMessages={setMessages}
-          setJoined={setJoined}
-          setKeepAlive={setKeepAlive}
-        />
+    <>
+      {isStreaming && (
+        <VideoView roomId={roomId!} host={isHost} setIsStreaming={setIsStreaming} setIsHost={setIsHost} />
       )}
-
-      <div className="chat-container">
-        <div className="chat-header">
-          <button className="home-btn" onClick={() => navigate('/')}>← Home</button>
-          <span className="chat-room">Room: <span className="chat-room-id"><code>{roomId}</code></span></span>
-          {joined && (
-          <label className="keepalive-toggle" title="Keep this room alive past 3 days">
-            <input
-              type="checkbox"
-              checked={keepAlive}
-              onChange={e => handleKeepAlive(e.target.checked)}
-            />
-            Keep alive
-          </label>
+      <div className="chat-wrapper">
+        {errorMessage ? (
+          <CorePopup
+            message={"An error occurred: " + errorMessage}
+          />
+        ): <></>}
+        {!joined && (
+          <NickNameOverlay
+            roomId={roomId!}
+            setName={setName}
+            setMessages={setMessages}
+            setJoined={setJoined}
+            setKeepAlive={setKeepAlive}
+          />
         )}
-          <span className="chat-name">{name}</span>
+
+        <div className="chat-container">
+          <div className="chat-header">
+            <button className="home-btn" onClick={() => navigate('/')}>← Home</button>
+            <span className="chat-room">Room: <span className="chat-room-id"><code>{roomId}</code></span></span>
+            {joined && (
+            <label className="keepalive-toggle" title="Keep this room alive past 3 days">
+              <input
+                type="checkbox"
+                checked={keepAlive}
+                onChange={e => handleKeepAlive(e.target.checked)}
+              />
+              Keep alive
+            </label>
+          )}
+            <span className="chat-name">{name}</span>
+          </div>
+
+          <MessagesSection messages={messages} name={name} aiLoading={aiLoading} />
+
+          <MessagesForm
+            roomId={roomId!}
+            name={name}
+            setMessages={setMessages}
+            setAiLoading={setAiLoading}
+            aiLoading={aiLoading}
+          />
+
         </div>
-
-        <MessagesSection messages={messages} name={name} aiLoading={aiLoading} />
-
-        <MessagesForm
-          roomId={roomId!}
-          name={name}
-          setMessages={setMessages}
-          setAiLoading={setAiLoading}
-          aiLoading={aiLoading}
-         />
-
       </div>
-    </div>
+    </>
   )
 }
 

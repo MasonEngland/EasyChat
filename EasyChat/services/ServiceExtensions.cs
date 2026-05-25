@@ -9,5 +9,7 @@ public static class ServiceExtensions
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IAIService, AIService>();
+        services.AddSingleton<IRoomVideoPathsDictionary<string, string>, RoomVideoPathsDictionary<string, string>>();
+
     }
 }
