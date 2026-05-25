@@ -22,7 +22,7 @@ public class AIService : IAIService
                 client.Timeout = TimeSpan.FromMinutes(2);
                 var response = await client.PostAsJsonAsync("http://ollama:11434/api/chat", new
                 {
-                    model ="mistral",
+                    model ="tinyllama",
                     messages = new[]
                     {
                         new { role = "system", content = "You are a helpful assistant in a chat room to help answer questions about general knowledge and trivia. Always be polite and formate responses in markdown. Keep responses brief. Use a conversational tone" },

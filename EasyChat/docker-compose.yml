@@ -23,6 +23,15 @@ services:
     ports:
       - "11434:11434"
 
+    # This script starts Ollama, waits 5 seconds for it to boot, pulls the model, then keeps running
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - |
+        ollama serve &
+        sleep 5
+        ollama pull tinyllama
+        wait
+
 volumes:
   sqlite_data:
   ollama_data:
