@@ -32,6 +32,20 @@ services:
         ollama pull tinyllama
         wait
 
+
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    environment:
+      TZ: "Australia/Brisbane"
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./nginx:/data
+      - ./letsencrypt:/etc/letsencrypt
+
 volumes:
   sqlite_data:
   ollama_data:
