@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import '../styles/Landing.css'
+import config from '../lib/config';
 
 function Landing() {
   const [roomId, setRoomId] = useState("")
   const navigate = useNavigate()
 
   const createRoom = async () => {
-    const res = await fetch('http://localhost:3000/api/Chat/Create', { method: 'POST' })
+    const res = await fetch(`${config.serverUrl}/Api/Chat/Create`, { method: 'POST' })
     const roomId = await res.text()
     navigate(`/chat/${roomId}`)
   }

@@ -1,3 +1,4 @@
+import config from "../lib/config";
 
 interface Props {
     messages: any[];
@@ -32,7 +33,7 @@ export default function MessagesSection({ messages, name, aiLoading }: Props) {
                   item.kind === 'text' 
                   ? <div key={j} className="message-bubble">{item.message}</div>
                   : <div key={j} className="message-bubble file-bubble">
-                  📎 <a href={`http://localhost:3000/Api/File/Download/${item.fileId}`} target="_blank" className="file-link">{item.fileName}</a>
+                  📎 <a href={`${config.serverUrl}/Api/File/Download/${item.fileId}`} target="_blank" className="file-link">{item.fileName}</a>
                   </div>
               ))}
             </div>

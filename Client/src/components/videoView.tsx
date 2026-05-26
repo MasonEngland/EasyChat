@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "../styles/videoView.css";
 import CoreButton from "./coreButton";
 import connection from "../lib/signalr";
+import config from "../lib/config";
 
 interface Props {
     roomId: string;
@@ -85,7 +86,7 @@ export default function VideoView({roomId, host, setIsStreaming, setIsHost} : Pr
                     ref={videoRef}
                  >
                     <source 
-                        src={`http://localhost:3000/Api/Streaming/Watch/${roomId}`} 
+                        src={`${config.serverUrl}/Api/Streaming/Watch/${roomId}`} 
                         type="video/mp4"
                     />
                 </video>
@@ -96,7 +97,7 @@ export default function VideoView({roomId, host, setIsStreaming, setIsHost} : Pr
         <div className="video-overlay">
             <video ref={videoRef} onError={() => handleStopStreaming()} >
                 <source 
-                    src={`http://localhost:3000/Api/Streaming/Watch/${roomId}`} 
+                    src={`${config.serverUrl}/Api/Streaming/Watch/${roomId}`} 
                     type="video/mp4" 
                 />
             </video>

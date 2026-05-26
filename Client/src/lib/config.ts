@@ -1,6 +1,6 @@
 
 const config = {
-  serverUrl: 'http://localhost:3000',
+  serverUrl: '',
 }
 
 export default config;

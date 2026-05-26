@@ -1,5 +1,6 @@
 import { useState } from "react";
 import connection from '../lib/signalr';
+import config from "../lib/config";
 
 
 interface Props {
@@ -21,7 +22,7 @@ export default function NickNameOverlay({ roomId, setName, setMessages, setJoine
             await connection.start()
             await connection.invoke("JoinRoom", nameInput, roomId)
 
-            const res = await fetch(`http://localhost:3000/api/Chat/GetMessages/${roomId}`)
+            const res = await fetch(`${config.serverUrl}/Api/Chat/GetMessages/${roomId}`)
             if (res.ok) {
                 const history = await res.json()
                 setMessages(history.map((m: any) => ({
@@ -31,7 +32,7 @@ export default function NickNameOverlay({ roomId, setName, setMessages, setJoine
                 })))
             }
 
-            const keepAliveRes = await fetch(`http://localhost:3000/api/Chat/KeepAlive/${roomId}`)
+            const keepAliveRes = await fetch(`${config.serverUrl}/Api/Chat/KeepAlive/${roomId}`)
             if (keepAliveRes.ok) {
                 const isKeepAlive = await keepAliveRes.json()
                 setKeepAlive(isKeepAlive)

@@ -1,6 +1,7 @@
 import connection from "../lib/signalr";
 import { useState } from "react";
 import CoreButton from "./coreButton";
+import config from "../lib/config";
 
 interface Props {
     roomId: string;
@@ -22,7 +23,7 @@ export default function MessagesForm({ roomId, name, setMessages, setAiLoading, 
         formData.append('RoomId', roomId)
         formData.append('User', name)
         formData.append('File', file)
-        await fetch(`http://localhost:3000/Api/File/Upload`, {
+        await fetch(`${config.serverUrl}/Api/File/Upload`, {
         method: 'POST',
         body: formData
         })
@@ -36,7 +37,7 @@ export default function MessagesForm({ roomId, name, setMessages, setAiLoading, 
         formData.append('RoomId', roomId)
         formData.append('User', name)
         formData.append('File', file)
-        await fetch(`http://localhost:3000/Api/Streaming/UploadVideo`, {
+        await fetch(`${config.serverUrl}/Api/Streaming/UploadVideo`, {
         method: 'POST',
         body: formData
         })
@@ -64,7 +65,7 @@ export default function MessagesForm({ roomId, name, setMessages, setAiLoading, 
             // Hit the backend calls Ollama and broadcasts via SignalR to everyone
             setAiLoading(true)
             try {
-            await fetch(`http://localhost:3000/Api/AI/GetResponse`, {
+            await fetch(`${config.serverUrl}/Api/AI/GetResponse`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ roomId, userMessage: prompt })

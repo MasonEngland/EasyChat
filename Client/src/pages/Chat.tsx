@@ -7,6 +7,7 @@ import MessagesSection from '../components/messagesSection';
 import MessagesForm from '../components/messagesForm';
 import CorePopup from '../components/corePopup';
 import VideoView from '../components/videoView';
+import config from '../lib/config';
 
 // test roomId: 0a2ce9e6-8a23-42d5-add8-4e22c31ac0fe
 
@@ -33,7 +34,7 @@ function Chat() {
   const handleKeepAlive = async (value: boolean) => {
     setKeepAlive(value)
     if (roomId) localStorage.setItem(`easychat.keepAlive.${roomId}`, value ? 'true' : 'false')
-    await fetch(`http://localhost:3000/Api/Chat/UpdateRoomLife`, {
+    await fetch(`${config.serverUrl}/Api/Chat/UpdateRoomLife`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ roomId, keepAlive: value })
