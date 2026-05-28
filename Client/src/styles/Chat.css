@@ -2,11 +2,22 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+html {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   margin: 0;
   background-color: #1e1f22;
   font-family: 'Noto Sans', sans-serif;
   color: #dcddde;
+  height: 100dvh;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    background-color: #313338;
+  }
 }
 
 /* ── layout ── */
@@ -28,8 +39,6 @@ body {
   background-color: #1e1f22;
   border-radius: 8px;
   overflow: hidden;
-
-  /* 💻 Default Computer Height */
   height: 88vh; 
 
   /* 📱 Mobile Height Override */
