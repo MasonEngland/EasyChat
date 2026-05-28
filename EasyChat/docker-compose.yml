@@ -16,7 +16,7 @@ services:
 
 
   ollama:
-    image: ollama/ollama
+    image: alpine/ollama
     container_name: ollama
     volumes:
       - ollama_data:/root/.ollama
