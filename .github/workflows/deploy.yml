@@ -1,0 +1,31 @@
+name: Deploy to Raspberry Pi
+
+on:
+  push:
+    branches: [ "master" ]  # Triggers when you push to master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute Remote SSH Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          # If you use a non-standard SSH port, uncomment the line below:
+          # port: 22 
+          script: |
+            # 1. Navigate to your cloned repository folder
+            cd ~/your-repo-folder-name
+            
+            # 2. Pull down the latest changes from master
+            git pull origin master
+            
+            # 3. Rebuild and restart the containers in the background
+            docker compose up -d --build
+
+            # 4. Clean up unused Docker resources
+            docker system prune -f
