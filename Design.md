@@ -32,3 +32,9 @@ Recieve file takes a user, file name, and file id.
 
 
 ## github actions tests for setup
+
+# test 1: failed
+
+# test 2: failed
+
+# test 3: 
