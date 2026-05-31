@@ -10,6 +10,14 @@ export default function MessagesSection({ messages, name, aiLoading }: Props) {
 
     return (
         <div className="messages-section">
+          {aiLoading && (
+            <div className="message-row ai">
+              <span className="message-sender">AI Assistant</span>
+              <div className="message-bubble ai-typing">
+                <span /><span /><span />
+              </div>
+            </div>
+          )}
           {messages.reduce((groups: any[], val, i) => {
             const prev = messages[i - 1]
             if (prev && prev.sender === val.sender) {
@@ -37,15 +45,6 @@ export default function MessagesSection({ messages, name, aiLoading }: Props) {
               ))}
             </div>
           )).reverse()}
-
-          {aiLoading && (
-            <div className="message-row ai">
-              <span className="message-sender">AI Assistant</span>
-              <div className="message-bubble ai-typing">
-                <span /><span /><span />
-              </div>
-            </div>
-          )}
         </div>
     )
 }
