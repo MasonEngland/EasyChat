@@ -8,7 +8,6 @@ interface Props {
 
 export default function MessagesSection({ messages, name, aiLoading }: Props) {
 
-
     return (
         <div className="messages-section">
           {messages.reduce((groups: any[], val, i) => {
@@ -37,7 +36,7 @@ export default function MessagesSection({ messages, name, aiLoading }: Props) {
                   </div>
               ))}
             </div>
-          ))}
+          )).reverse()}
 
           {aiLoading && (
             <div className="message-row ai">

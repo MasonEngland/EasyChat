@@ -140,7 +140,7 @@ body {
   overflow-y: auto;
   padding: 16px 16px 8px;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 2px;
   background: #313338;
 }
