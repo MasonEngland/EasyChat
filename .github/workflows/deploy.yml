@@ -19,10 +19,14 @@ jobs:
           # port: 22 
           script: |
             # 1. Navigate to your cloned repository folder
-            cd ~/your-repo-folder-name
+            cd ~/EasyChat
             
             # 2. Pull down the latest changes from master
             git pull origin master
+
+            cd EasyChat
+
+            docker compose down
             
             # 3. Rebuild and restart the containers in the background
             docker compose up -d --build
