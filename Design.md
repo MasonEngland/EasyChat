@@ -29,3 +29,6 @@ to display files the method name is "SendFile" and "RecieveFile"
 
 add a CatchError signalr method for error handling and add a "RecieveFile" method to get the id and name of a file that can then be used to download files. 
 Recieve file takes a user, file name, and file id.
+
+
+## github actions tests for setup
